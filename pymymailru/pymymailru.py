@@ -20,6 +20,12 @@ class ApiError:
         self.code = code
         self.message = message
 
+    def __str__(self):
+        return str(self.code) + ' ' + self.message
+
+    def __unicode__(self):
+        return unicode(self.code) + ' ' + self.message
+
 class ApiCaller:
 
     def __init__(self, app_id, secret_key, format=FORMAT_JSON):

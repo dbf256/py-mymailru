@@ -36,27 +36,32 @@ class ApiCaller:
     def __calc_signature(self, params):
         params_str = ''
         for key in sorted(params.iterkeys()):
-            params_str += (unicode(key) + u'=' + unicode(params[key]))
+            params_str += (key + '=' + params[key])
         return hashlib.md5(params_str + self.secret_key).hexdigest()
 
     def __prepare_api_params(self, format, method_name, params, session_key, uid):
+        user_auth_param = None
+        user_auth_data = None
         if session_key is not None and session_key != '':
             user_auth_param = 'session_key'
             user_auth_data = session_key
-        else:
+        elif uid is not None and uid != '':
             user_auth_param = 'uid'
             user_auth_data = uid
         api_params = {
             'method': method_name,
             'secure': 1,
-            user_auth_param: user_auth_data,
             'format': format,
             'app_id': self.app_id,
             }
+        if user_auth_param is not None:
+            api_params[user_auth_param] = user_auth_data
         for param_name in params:
             api_params[param_name] = params[param_name]
             if api_params[param_name] is None:
                 api_params[param_name] = ''
+        for param in api_params:
+            api_params[param] = unicode(api_params[param]).encode('utf-8')
         api_params['sig'] = self.__calc_signature(api_params)
         return api_params
 
@@ -73,16 +78,19 @@ class ApiCaller:
             return ApiError(code, msg)
 
     def execute(self, method_name, params, session_key_or_uid, format=FORMAT_JSON, method=METHOD_GET):
-        try:
-            int(session_key_or_uid)
-            session_key = None
-            uid = unicode(session_key_or_uid)
-        except ValueError:
-            session_key = session_key_or_uid
-            uid = None
-        api_params = self.__prepare_api_params(format, method_name, params, session_key, uid)
+        if session_key_or_uid is not None:
+            try:
+                int(session_key_or_uid)
+                session_key = None
+                uid = unicode(session_key_or_uid)
+            except ValueError:
+                session_key = session_key_or_uid
+                uid = None
+            api_params = self.__prepare_api_params(format, method_name, params, session_key, uid)
+        else:
+            api_params = self.__prepare_api_params(format, method_name, params, None, None)
         if method == METHOD_GET:
-            req = BASE_URL + urllib.urlencode(api_params)
+            req = BASE_URL.encode('utf-8') + urllib.urlencode(api_params)
         else:
             req = urllib2.Request(BASE_URL, urllib.urlencode(api_params))
         try:
@@ -93,6 +101,10 @@ class ApiCaller:
             raise error
 
 class PyMyMailRu:
+
+    def __split(self, l, n):
+        return [l[i:i+n] for i in range(0, len(l), n)]
+
 
     def __init__(self, app_id, secret_key, format=FORMAT_JSON):
         self.app_id = app_id
@@ -148,8 +160,8 @@ class PyMyMailRu:
     def mobile_get_canvas(self, mobile_spec, session_key_or_uid):
         return self.execute('mobile.getCanvas', {'mobile_spec' : mobile_spec}, session_key_or_uid, self.format)
 
-    def notifications_send(self, uids, text, session_key_or_uid):
-        return self.execute('notifications.send', {'uids' : uids, 'text' : text}, session_key_or_uid, self.format, METHOD_POST)
+    def notifications_send(self, uids, text):
+        return self.execute('notifications.send', {'uids' : uids, 'text' : text}, None, self.format, method=METHOD_POST)
 
     def photos_create_album(self, aid, title, description, privacy, password, session_key_or_uid):
         return self.execute('photos.createAlbum', {'aid' : aid, 'title' : title, 'description' : description,

@@ -100,6 +100,17 @@ class ApiCaller:
             error = self.__get_error_from_response(e, format)
             raise error
 
+class MyMailUtil:
+    # Converts http://my.mail.ru/inbox/user/ to user@inbox.ru
+    def link_to_email(self, link):
+        if link is None:
+            return None
+        link = link[len('http://my.mail.ru/'):-1]
+        parts = link.split('/')
+        return parts[1] + '@' + parts[0] + '.ru'
+
+
+
 class PyMyMailRu:
 
     def __split(self, l, n):

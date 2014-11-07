@@ -4,7 +4,8 @@ Created by Alexey Moskvin, 2011
 """
 
 import hashlib
-import urllib, urllib2
+import urllib
+import urllib2
 
 METHOD_GET = 'get'
 METHOD_POST = 'post'
@@ -13,6 +14,7 @@ FORMAT_JSON = 'json'
 FORMAT_XML = 'xml'
 
 BASE_URL = u'http://www.appsmail.ru/platform/api?'
+
 
 class ApiError:
     
@@ -25,6 +27,7 @@ class ApiError:
 
     def __unicode__(self):
         return unicode(self.code) + ' ' + self.message
+
 
 class ApiCaller:
 
@@ -100,6 +103,7 @@ class ApiCaller:
             error = self.__get_error_from_response(e, format)
             raise error
 
+
 class MyMailUtil:
     # Converts http://my.mail.ru/inbox/user/ to user@inbox.ru
     def link_to_email(self, link):
@@ -108,7 +112,6 @@ class MyMailUtil:
         link = link[len('http://my.mail.ru/'):-1]
         parts = link.split('/')
         return parts[1] + '@' + parts[0] + '.ru'
-
 
 
 class PyMyMailRu:
@@ -218,14 +221,11 @@ class PyMyMailRu:
         return self.execute('stream.unlike', {'thread_id' : thread_id}, session_key_or_id, self.format)
 
     def users_get_info(self, uids, session_key_or_uid):
-        return  self.execute('users.getInfo', {'uids' : uids}, session_key_or_uid, self.format)
+        return self.execute('users.getInfo', {'uids' : uids}, session_key_or_uid, self.format)
 
 
     def users_has_app_permission(self, ext_perm, session_key_or_uid):
-        return  self.execute('hasAppPermission', {'ext_perm' : ext_perm}, session_key_or_uid, self.format)
+        return self.execute('hasAppPermission', {'ext_perm' : ext_perm}, session_key_or_uid, self.format)
 
     def users_is_app_user(self, session_key_or_uid):
-        return  self.execute('users.isAppUser', {}, session_key_or_uid, self.format)
-
-
-        
+        return self.execute('users.isAppUser', {}, session_key_or_uid, self.format)

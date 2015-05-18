@@ -10,7 +10,7 @@ PyMyMailRu - оболочка для REST-сервиса mail.ru (http://api.mai
 Установка
 ------------------------
 
-Для использования скопируйте файл pymymailru.py в удобное место и импортируйте из него объекты PyMyMailRu и ApiError
+pip install pymymailru
 
 
 Пример использования

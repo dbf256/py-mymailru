@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # импорт
 from pymymailru import PyMyMailRu, ApiError
 

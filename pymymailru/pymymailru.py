@@ -105,13 +105,34 @@ class ApiCaller:
 
 
 class MyMailUtil:
+
     # Converts http://my.mail.ru/inbox/user/ to user@inbox.ru
     def link_to_email(self, link):
         if link is None:
             return None
-        link = link[len('http://my.mail.ru/'):-1]
-        parts = link.split('/')
+        user_part = self.fetch_user_part(link)
+        parts = user_part.split('/')
         return parts[1] + '@' + parts[0] + '.ru'
+
+    def fetch_user_part(self, link):
+        if not link.endswith('/'):
+            link += '/'
+        if link.startswith('http://'):
+            link = link[len('http://my.mail.ru/'):-1]
+        elif link.startswith('https://'):
+            link = link[len('http://my.mail.ru/'):-1]
+        return link
+
+    #Converts http://my.mail.ru/mail/qqq to 124378578943789
+    def link_to_uid(self, link):
+        if link is None:
+            return None
+        user_part = self.fetch_user_part(link)
+        uid_link = 'http://appsmail.ru/platform/' + user_part
+        result_fd = urllib2.urlopen(uid_link)
+        import simplejson as json
+        text = json.load(result_fd)
+        return text['uid']
 
 
 class PyMyMailRu:
@@ -150,6 +171,9 @@ class PyMyMailRu:
     def friends_get_invintations_count(self, uid, session_key):
         return self.execute('friends.getInvitationsCount', {'uid' : uid}, session_key, self.format)
 
+    def friends_get_online(self, ext, session_key):
+        return self.execute('friends.getOnline', {'ext' : ext}, session_key, self.format)
+
     def guestbook_get(self, uid, offset, limit, session_key):
         return self.execute('guestbook.get', {'uid' : uid, 'offset' : offset, 'limit' : limit}, session_key, self.format)
 
@@ -168,11 +192,17 @@ class PyMyMailRu:
     def messages_get_threads_list(self, uid, offset, limit, session_key):
         return self.execute('messages.getThreadsList', {'uid' : uid, 'offset' : offset, 'limit' : limit}, session_key, self.format)
 
+    def messages_get_unread_count(self, session_key):
+        return self.execute('messages.getUnreadCount', {}, session_key, self.format)
+
     def messages_post(self, uid, message, session_key):
         return self.execute('messages.post', {'uid' : uid, 'message' : message}, session_key, self.format)
 
     def mobile_get_canvas(self, mobile_spec, session_key_or_uid):
         return self.execute('mobile.getCanvas', {'mobile_spec' : mobile_spec}, session_key_or_uid, self.format)
+
+    def multipost_send(self, uid2, text, photo, audio, video, session_key):
+        return self.execute('multipost.send', {'uid2' : uid2, 'text': text, 'photo': photo, 'audio': audio, 'video': video}, session_key, self.format)
 
     def notifications_send(self, uids, text):
         return self.execute('notifications.send', {'uids' : uids, 'text' : text}, None, self.format, method=METHOD_POST)
@@ -192,6 +222,12 @@ class PyMyMailRu:
         return self.execute('photos.upload', {'aid' : aid, 'img_url' : img_url, 'img_file' : img_file, 'name' : name,
                                               'description' : description, 'tags' : tags, 'theme' : theme},
                             session_key_or_id, self.format)
+
+    def score_add(self, score, uid2, session_key_or_uid):
+        return self.execute('score.add', {'score': score, 'uid2': uid2}, session_key_or_uid, self.format)
+
+    def score_total(self, session_key):
+        return self.execute('score.add', {}, session_key, self.format)
 
     def stream_comment(self, thread_id, text, session_key_or_id):
         return self.execute('stream.comment', {'thread_id' : thread_id, 'text' : text}, session_key_or_id, self.format,
@@ -219,6 +255,9 @@ class PyMyMailRu:
 
     def stream_unlike(self, thread_id, session_key_or_id):
         return self.execute('stream.unlike', {'thread_id' : thread_id}, session_key_or_id, self.format)
+
+    def users_get_balance(self, session_key):
+        return self.execute('users.getBalance', {}, session_key, self.format)
 
     def users_get_info(self, uids, session_key_or_uid):
         return self.execute('users.getInfo', {'uids' : uids}, session_key_or_uid, self.format)

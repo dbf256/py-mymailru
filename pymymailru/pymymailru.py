@@ -256,6 +256,24 @@ class PyMyMailRu:
     def stream_unlike(self, thread_id, session_key_or_id):
         return self.execute('stream.unlike', {'thread_id' : thread_id}, session_key_or_id, self.format)
 
+    def titles_add(self, img_url, name, session_key):
+        return self.execute('titles.add', {'img_url': img_url, 'name': name}, session_key, self.format)
+
+    def titles_del(self, title_id, session_key):
+        return self.execute('titles.del', {'id': title_id}, session_key, self.format)
+
+    def titles_list(self, limit, offset, session_key):
+        return self.execute('titles.list', {'limit': limit, 'offset': offset}, session_key, self.format)
+
+    def titles_update(self, title_id, image, name, session_key):
+        return self.execute('titles.update', {'id': title_id, 'image': image, 'name': name}, session_key, self.format)
+
+    def titles_user_drop(self, session_key):
+        return self.execute('titles.user_drop', {}, session_key, self.format)
+
+    def titles_user_reward(self, title_id, session_key):
+        return self.execute('titles.user_reward', {'id': title_id}, session_key, self.format)
+
     def users_get_balance(self, session_key):
         return self.execute('users.getBalance', {}, session_key, self.format)
 

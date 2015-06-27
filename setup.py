@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pymymailru',
-      version='0.5.1',
+      version='0.5.2',
       description='Python API to MyMailRu API',
       url='https://github.com/dbf256/py-mymailru',
       author='Alexey Moskvin',

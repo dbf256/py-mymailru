@@ -36,6 +36,8 @@ class ApiCaller:
         self.secret_key = secret_key
         self.format = format
 
+    insecure_methods = ['audio.top']
+
     def __calc_signature(self, params):
         params_str = ''
         for key in sorted(params.iterkeys()):
@@ -51,9 +53,13 @@ class ApiCaller:
         elif uid is not None and uid != '':
             user_auth_param = 'uid'
             user_auth_data = uid
+        if method_name in self.insecure_methods:
+            secure = 0
+        else:
+            secure = 1
         api_params = {
             'method': method_name,
-            'secure': 1,
+            'secure': secure,
             'format': format,
             'app_id': self.app_id,
             }
@@ -140,7 +146,6 @@ class PyMyMailRu:
     def __split(self, l, n):
         return [l[i:i+n] for i in range(0, len(l), n)]
 
-
     def __init__(self, app_id, secret_key, format=FORMAT_JSON):
         self.app_id = app_id
         self.secret_key = secret_key
@@ -150,6 +155,39 @@ class PyMyMailRu:
     def execute(self, method_name, params, session_key_or_uid, format=FORMAT_JSON, method=METHOD_GET):
         return self.api_caller.execute(method_name, params, session_key_or_uid, format, method)
 
+    def achievements_add(self, img_url, description, width, group_id, session_key):
+        return self.execute('achievements.add', {'img_url': img_url, 'description': description, 'width': width, 'group_id': group_id}, session_key, self.format)
+
+    def achievements_groups(self, groups, session_key):
+        return self.execute('achievements.groups', {'groups': groups}, session_key, self.format)
+
+    def achievements_group_add(self, description, session_key):
+        return self.execute('achievements.group_add', {'description': description}, session_key, self.format)
+
+    def achievements_group_remove(self, group_id, session_key):
+        return self.execute('achievements.group_remove', {'group_id': group_id}, session_key, self.format)
+
+    def achievements_group_update(self, group_id, description, session_key):
+        return self.execute('achievements.group_update', {'group_id': group_id, 'description': description}, session_key, self.format)
+
+    def achievements_list(self, limit, offset, session_key):
+        return self.execute('achievements.list', {'limit': limit, 'offset': offset}, session_key, self.format)
+
+    def achievements_remove(self, achievement_id, session_key):
+        return self.execute('achievements_remove', {'id': achievement_id}, session_key, self.format)
+
+    def achievements_reward(self, achievement_id, uid, session_key):
+        return self.execute('achievements_remove', {'id': achievement_id, 'uid': uid}, session_key, self.format)
+
+    def achievements_unreward(self, achievement_id, uid, session_key):
+        return self.execute('achievements.unreward', {'id': achievement_id, 'uid': uid}, session_key, self.format)
+
+    def achievements_update(self, achievement_id, img_url, description, weight, session_key):
+        return self.execute('achievements.update', {'id': achievement_id, 'img_url': img_url, 'description': description, 'weight': weight}, session_key, self.format)
+
+    def achievements_user_awards(self, limit, offset, session_key):
+        return self.execute('achievements.user_awards', {'limit': limit, 'offset': offset}, session_key, self.format)
+
     def audio_get(self, mids, uid, session_key):
         return self.execute('audio.get', {'mids' : mids, 'uid' : uid}, session_key, self.format)
 
@@ -158,6 +196,9 @@ class PyMyMailRu:
 
     def audio_search(self, query, offset, limit, session_key_or_uid):
         return self.execute('audio.search', {'query' : query, 'offset' : offset, 'limit' : limit}, session_key_or_uid, self.format)
+
+    def audio_top(self, offset, limit, session_key_or_uid):
+        return self.execute('audio.top', {'offset' : offset, 'limit' : limit}, session_key_or_uid, self.format)
 
     def events_get_new_count(self, session_key_or_uid):
         return self.execute('events.getNewCount', {}, session_key_or_uid, self.format)
